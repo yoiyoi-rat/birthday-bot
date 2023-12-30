@@ -1,4 +1,5 @@
 mod handler;
+mod error;
 
 use actix_web::{middleware::Logger, web::{self, Data}, HttpServer, App};
 use dotenv::dotenv;
@@ -37,7 +38,7 @@ async fn main() -> std::io::Result<()> {
     // build server
     HttpServer::new(move || {
         App::new()
-            .wrap(Logger::default()) // log output is applyed to all request
+            .wrap(Logger::default())
             .app_data(Data::clone(&appinfo))
             .route("/webhook", web::get().to(handler::get_test))
             .route("/webhook", web::post().to(handler::post_test))
