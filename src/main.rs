@@ -1,5 +1,6 @@
 mod handler;
 mod error;
+mod deserialize;
 
 use actix_web::{middleware::Logger, web::{self, Data}, HttpServer, App};
 use dotenv::dotenv;
@@ -8,6 +9,7 @@ use std::env;
 
 // define app state information
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ChannelInfo {
     channel_id_: String,
     channel_secret_: String,
