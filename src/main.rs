@@ -30,7 +30,7 @@ impl ChannelInfo {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // import ans set dotenv value
+    // import dotenv value
     let appinfo = Data::new(ChannelInfo::new());
 
     // logger set

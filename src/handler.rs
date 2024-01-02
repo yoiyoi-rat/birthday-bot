@@ -7,8 +7,9 @@ use data_encoding::BASE64;
 use crate::ChannelInfo;
 use crate::error::MyError;
 use crate::deserialize::*;
+//type Result<T> = std::result::Result<T, MyError>;
 
-// struct for json serialize to reply
+// reply data struct
 #[derive(Debug, Clone, Serialize)]
 pub struct ReplyMessage {
     #[serde(rename = "type")]

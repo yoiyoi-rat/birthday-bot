@@ -1,7 +1,5 @@
 use thiserror::Error;
-// use actix_web::Error as webError;
 use awc::error::SendRequestError;
-//type Result<T> = std::result::Result<T, MyError>;
 
 #[derive(Error, Debug)]
 pub enum MyError {

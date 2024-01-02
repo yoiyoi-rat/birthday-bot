@@ -15,7 +15,6 @@ impl FromRequest for HeaderData {
     type Future = Ready<Result<HeaderData, Error>>;
 
     fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
-        // headerの値を取得
         match req.headers().get("x-line-signature") {
             Some(value) => ok(HeaderData {x_line_signature: value.to_str().unwrap().to_string() }),
             None => err(ErrorBadRequest("not found signature"))
@@ -206,10 +205,9 @@ mod test {
                 }
             ]
         };
-            // 関数を呼び出す
+
         let result_data = deserialize_json(json_data).expect("failed deserialize json");
         assert_eq!(result_data, true_data);
-        // assert_eq!j
     }
 }
 
