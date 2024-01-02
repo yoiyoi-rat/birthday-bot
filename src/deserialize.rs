@@ -1,8 +1,36 @@
 use serde::{Serialize, Deserialize, Deserializer};
+use actix_web::{dev::Payload, FromRequest, error::Error, HttpRequest, error::ErrorBadRequest};
+use futures_util::future::{ok, err, Ready};
 use crate::error::MyError;
 
 
+// header
+#[derive(Debug, Clone, Deserialize)]
+pub struct HeaderData {
+    x_line_signature: String,
+}
 
+impl FromRequest for HeaderData {
+    type Error = Error;
+    type Future = Ready<Result<HeaderData, Error>>;
+
+    fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
+        // headerの値を取得
+        match req.headers().get("x-line-signature") {
+            Some(value) => ok(HeaderData {x_line_signature: value.to_str().unwrap().to_string() }),
+            None => err(ErrorBadRequest("not found signature"))
+        }
+    }
+}
+
+impl HeaderData {
+    pub fn get_signature(&self) -> String {
+        self.x_line_signature.clone()
+    }
+}
+
+
+// body
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ReceivedData {
     destination: String,

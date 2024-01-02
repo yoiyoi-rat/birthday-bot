@@ -1,23 +1,24 @@
 use actix_web::{HttpResponse, Responder, web::Data, http::StatusCode};
 use awc::Client;
-use serde::{Serialize, Deserialize};
+use serde::Serialize;
+use ring::hmac;
+use data_encoding::BASE64;
 
 use crate::ChannelInfo;
 use crate::error::MyError;
 use crate::deserialize::*;
 
-
 // struct for json serialize to reply
-#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ReplyMessage {
     #[serde(rename = "type")]
     message_type: String,
     text: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Serialize)]
 #[allow(non_snake_case)]
-pub struct ReplyData {
+struct ReplyData {
     replyToken: String,
     messages: Vec<ReplyMessage>,
 }
@@ -36,6 +37,19 @@ async fn reply_message(client: &Client, request: &serde_json::Value, appinfo: &D
 }
 
 
+fn verify_signature(header_data: &HeaderData, req_body: &String, appinfo: &Data<ChannelInfo>) -> Result<(), MyError> {
+    // use HMAC-SHA256 using channel_secret_ as secret key
+    let key = hmac::Key::new(hmac::HMAC_SHA256, appinfo.channel_secret_.as_bytes());
+    let msg = req_body;
+    let tag = hmac::sign(&key, msg.as_bytes());
+    let base64_encoded_tag = BASE64.encode(tag.as_ref());
+    if base64_encoded_tag == header_data.get_signature() {
+        Ok(())
+    } else {
+        Err(MyError::FailedToVerifySignature)
+    }
+}
+
 
 
 // handler
@@ -44,8 +58,11 @@ pub async fn get_test() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
 }
 
-pub async fn post_test(req_body: String, appinfo: Data<ChannelInfo>) -> impl Responder {
+pub async fn post_test(header_data: HeaderData, req_body: String, appinfo: Data<ChannelInfo>) -> impl Responder {
     log::info!("req_body: {}", req_body);
+
+    verify_signature(&header_data, &req_body, &appinfo).unwrap();
+
     // deserialize json and get essential data
     let received_json: ReceivedData = serde_json::from_str(&req_body).expect("failed to deserialize json"); 
     let reply_token = received_json.get_reply_token().expect("cannot reply");
@@ -61,7 +78,6 @@ pub async fn post_test(req_body: String, appinfo: Data<ChannelInfo>) -> impl Res
             }
         ]
     });
-    // log::info!("request: {}", request);
 
     let client = Client::default();
    

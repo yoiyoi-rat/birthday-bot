@@ -12,5 +12,7 @@ pub enum MyError {
     #[error("received unsupported message")]
     UnsupportedMessage,
     #[error("failed to get replytoken")]
-    FailedToGetReplyToken
+    FailedToGetReplyToken,
+    #[error("failed to verify signature")]
+    FailedToVerifySignature,
 }

@@ -15,3 +15,6 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"]}
 awc = {version = "3.0.1", features = ["rustls"] }
 thiserror = "1.0.51"
+futures-util = "0.3.30"
+ring = "0.17.7"
+data-encoding = "2.5.0"
